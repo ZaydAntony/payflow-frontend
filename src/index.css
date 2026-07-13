@@ -1,0 +1,123 @@
+@import "tailwindcss";
+
+@theme {
+  /* Color tokens — "money in motion" palette, grounded in mobile money + the Kenyan landscape */
+  --color-ink: #0e2a22; /* deep forest — dashboard chrome, dark sections */
+  --color-ink-soft: #16362c; /* raised panels on dark */
+  --color-parchment: #f5f1e6; /* warm paper — light bg, cards */
+  --color-parchment-dim: #ebe5d4;
+  --color-jade: #1f6f54; /* primary brand — buttons, links */
+  --color-jade-deep: #164f3c;
+  --color-mango: #ff9f1c; /* signature accent — CTA, live pulse, notification */
+  --color-mango-deep: #e8890a;
+  --color-teal: #3fa796; /* success / paid */
+  --color-coral: #e8553d; /* error / failed */
+  --color-text: #16241e; /* ink-tinted near-black, on parchment */
+  --color-text-soft: #4a5a52;
+
+  --font-display: "Instrument Serif", "Georgia", serif;
+  --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-parchment);
+  color: var(--color-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background-color: var(--color-mango);
+  color: var(--color-ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-mango);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Ripple — the signature motif. An STK push arriving on a phone: a message
+   lands, and a ring of confirmation spreads outward from it. Reused for
+   loading states, the hero phone mockup, and "live" indicators. */
+@keyframes ripple {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.55;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+.ripple-ring {
+  animation: ripple 1.8s cubic-bezier(0.2, 0.6, 0.4, 1) infinite;
+}
+
+@keyframes float-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.float-in {
+  animation: float-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes buzz {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  20% {
+    transform: rotate(-1.2deg);
+  }
+  40% {
+    transform: rotate(1.2deg);
+  }
+  60% {
+    transform: rotate(-0.6deg);
+  }
+  80% {
+    transform: rotate(0.6deg);
+  }
+}
+.buzz {
+  animation: buzz 0.5s ease-in-out;
+}
+
+@keyframes float-blob {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(20px, -30px) scale(1.08);
+  }
+  66% {
+    transform: translate(-15px, 20px) scale(0.95);
+  }
+}
+
+.text-balance {
+  text-wrap: balance;
+}
