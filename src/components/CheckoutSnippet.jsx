@@ -81,14 +81,21 @@ export default function CheckoutSnippet({ page }) {
 }
 
 function getSnippet({ page, framework, mode }) {
-  const url = page.payment_url;
+  const apiUrl = page.payment_url;
+  // A human clicking this link should land on the polished checkout page,
+  // not the raw DRF API endpoint. The inline mode below calls apiUrl
+  // directly since that's a programmatic fetch, not a page a person visits.
+  const humanUrl =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/pay/${page.public_id}/`
+      : apiUrl;
   const isFixed = page.page_type === "fixed";
   const isApi = page.page_type === "api";
 
   if (mode === "redirect") {
     if (framework === "html") {
       return `<a
-  href="${url}"
+  href="${humanUrl}"
   target="_blank"
   rel="noopener noreferrer"
   style="display:inline-block;padding:12px 24px;border-radius:9999px;
@@ -100,7 +107,7 @@ function getSnippet({ page, framework, mode }) {
     return `export function PayButton() {
   return (
     <a
-      href="${url}"
+      href="${humanUrl}"
       target="_blank"
       rel="noopener noreferrer"
       className="inline-block rounded-full bg-emerald-700 px-6 py-3 font-semibold text-white"
@@ -111,6 +118,7 @@ function getSnippet({ page, framework, mode }) {
 }`;
   }
 
+  const url = apiUrl;
   // inline mode — posts straight to the checkout endpoint
   const amountField = isApi
     ? `${framework === "html" ? "document.getElementById('amount').value" : "amount"}`

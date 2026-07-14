@@ -13,30 +13,39 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-parchment">
-      <div className="mx-auto flex max-w-6xl gap-8 px-6 py-10">
-        <aside className="w-56 shrink-0">
-          <Link to="/" className="mb-8 flex items-center gap-2">
+      <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-6 md:flex-row md:gap-8 md:px-6 md:py-10">
+        <aside className="flex shrink-0 flex-row items-center justify-between gap-4 md:w-56 md:flex-col md:items-stretch md:justify-start">
+          <Link to="/" className="flex shrink-0 items-center gap-2 md:mb-8">
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-ink">
               <span className="h-2.5 w-2.5 rounded-full bg-mango" />
             </span>
             <span className="font-display text-xl italic text-text">PayFlow</span>
           </Link>
 
-          <p className="mb-1 px-1 font-mono text-[11px] uppercase tracking-wider text-text-soft">
-            Signed in as
-          </p>
-          <p className="mb-6 truncate px-1 text-sm font-semibold text-text">
-            {user?.username}
-          </p>
+          <div className="hidden md:block">
+            <p className="mb-1 px-1 font-mono text-[11px] uppercase tracking-wider text-text-soft">
+              Signed in as
+            </p>
+            <p className="mb-6 truncate px-1 text-sm font-semibold text-text">
+              {user?.username}
+            </p>
+          </div>
 
-          <nav className="flex flex-col gap-1">
+          <button
+            onClick={logout}
+            className="shrink-0 text-xs font-medium text-text-soft hover:text-coral md:order-last md:mt-8 md:px-3 md:text-sm"
+          >
+            Log out
+          </button>
+
+          <nav className="order-3 -mx-4 flex gap-1 overflow-x-auto px-4 pb-1 md:order-none md:mx-0 md:flex-col md:overflow-visible md:px-0 md:pb-0">
             {NAV.map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}
                 end={item.end}
                 className={({ isActive }) =>
-                  "rounded-lg px-3 py-2.5 text-sm font-medium transition-colors " +
+                  "shrink-0 whitespace-nowrap rounded-lg px-3 py-2.5 text-sm font-medium transition-colors " +
                   (isActive
                     ? "bg-ink text-parchment"
                     : "text-text-soft hover:bg-ink/5 hover:text-text")
@@ -46,13 +55,6 @@ export default function Dashboard() {
               </NavLink>
             ))}
           </nav>
-
-          <button
-            onClick={logout}
-            className="mt-8 px-3 text-sm font-medium text-text-soft hover:text-coral"
-          >
-            Log out
-          </button>
         </aside>
 
         <main className="min-w-0 flex-1">

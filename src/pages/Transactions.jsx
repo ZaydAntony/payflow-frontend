@@ -113,7 +113,8 @@ export default function Transactions() {
         )}
 
         {filtered?.length > 0 && (
-          <table className="w-full text-left text-sm">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[640px] text-left text-sm">
             <thead>
               <tr className="border-b border-ink/8 text-xs uppercase tracking-wide text-text-soft">
                 <th className="px-5 py-3 font-medium">Checkout page</th>
@@ -155,6 +156,7 @@ export default function Transactions() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </div>

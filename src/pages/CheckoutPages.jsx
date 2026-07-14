@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import {
+  listCheckoutPages,
   createCheckoutPage,
   deleteCheckoutPage,
-  listCheckoutPages,
   listProfiles,
 } from "../api/client";
-import Button from "../components/Button";
-import CheckoutSnippet from "../components/CheckoutSnippet";
 import { useToast } from "../components/Toast";
+import Button from "../components/Button";
 import { EmptyState } from "./Profiles";
+import CheckoutSnippet from "../components/CheckoutSnippet";
 
 const EMPTY = {
   profile: "",
@@ -55,9 +55,7 @@ export default function CheckoutPages() {
     setErrors({});
 
     if (!form.profile) {
-      setErrors({
-        profile: ["Select a payment profile before creating a checkout page."],
-      });
+      setErrors({ profile: ["Select a payment profile before creating a checkout page."] });
       return;
     }
 
@@ -74,19 +72,14 @@ export default function CheckoutPages() {
     } catch (err) {
       const data = err.response?.data;
       if (data && typeof data === "object") setErrors(data);
-      else
-        push(
-          "Couldn't create that page. Check the details and try again.",
-          "error",
-        );
+      else push("Couldn't create that page. Check the details and try again.", "error");
     } finally {
       setSaving(false);
     }
   };
 
   const onDelete = async (id) => {
-    if (!confirm("Delete this checkout page? Its link will stop working."))
-      return;
+    if (!confirm("Delete this checkout page? Its link will stop working.")) return;
     try {
       await deleteCheckoutPage(id);
       push("Checkout page deleted.");
@@ -96,8 +89,14 @@ export default function CheckoutPages() {
     }
   };
 
+  // page.payment_url points at the raw DRF API endpoint (useful for the
+  // fetch-based snippet in CheckoutSnippet), but a human clicking "Open" or
+  // pasting the copied link should land on our own polished /pay page, not
+  // the browsable API. Build that link from public_id instead.
+  const checkoutLink = (page) => `${window.location.origin}/pay/${page.public_id}/`;
+
   const copyLink = (page) => {
-    navigator.clipboard.writeText(page.payment_url);
+    navigator.clipboard.writeText(checkoutLink(page));
     setCopiedId(page.id);
     push("Link copied to clipboard.", "success");
     setTimeout(() => setCopiedId(null), 1500);
@@ -107,9 +106,7 @@ export default function CheckoutPages() {
     <div>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-3xl italic text-text">
-            Checkout pages
-          </h1>
+          <h1 className="font-display text-3xl italic text-text">Checkout pages</h1>
           <p className="mt-1 text-sm text-text-soft">
             Shareable links that trigger an STK push when a customer pays.
           </p>
@@ -121,16 +118,12 @@ export default function CheckoutPages() {
 
       {profiles.length === 0 && pages !== null && (
         <p className="mt-6 rounded-xl bg-mango/10 px-4 py-3 text-sm text-mango-deep">
-          Connect a payment profile first — checkout pages need one to know
-          where the money goes.
+          Connect a payment profile first — checkout pages need one to know where the money goes.
         </p>
       )}
 
       {showForm && (
-        <form
-          onSubmit={onSubmit}
-          className="float-in mt-8 rounded-2xl border border-ink/10 bg-white/50 p-6"
-        >
+        <form onSubmit={onSubmit} className="float-in mt-8 rounded-2xl border border-ink/10 bg-white/50 p-6">
           <div className="grid gap-4 md:grid-cols-2">
             <div>
               <label className="mb-1.5 block text-xs font-medium text-text-soft">
@@ -142,18 +135,12 @@ export default function CheckoutPages() {
                 onChange={set("profile")}
                 className="w-full rounded-xl border border-ink/12 bg-white px-4 py-3 text-sm outline-none focus:border-jade"
               >
-                <option value="" disabled>
-                  Select a profile
-                </option>
+                <option value="" disabled>Select a profile</option>
                 {profiles.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.business_name}
-                  </option>
+                  <option key={p.id} value={p.id}>{p.business_name}</option>
                 ))}
               </select>
-              {errors.profile?.[0] && (
-                <p className="mt-1 text-xs text-coral">{errors.profile[0]}</p>
-              )}
+              {errors.profile?.[0] && <p className="mt-1 text-xs text-coral">{errors.profile[0]}</p>}
             </div>
 
             <div>
@@ -166,45 +153,21 @@ export default function CheckoutPages() {
                 className="w-full rounded-xl border border-ink/12 bg-white px-4 py-3 text-sm outline-none focus:border-jade"
               >
                 <option value="fixed">Fixed amount</option>
-                <option value="flexible">
-                  Flexible (customer sets amount)
-                </option>
+                <option value="flexible">Flexible (customer sets amount)</option>
                 <option value="api">API-driven</option>
               </select>
             </div>
 
-            <Field
-              label="Title"
-              value={form.title}
-              onChange={set("title")}
-              error={errors.title?.[0]}
-              required
-            />
+            <Field label="Title" value={form.title} onChange={set("title")} error={errors.title?.[0]} required />
             {form.page_type === "fixed" && (
-              <Field
-                label="Fixed amount (KES)"
-                type="number"
-                value={form.fixed_amount}
-                onChange={set("fixed_amount")}
-                error={errors.fixed_amount?.[0]}
-                required
-              />
+              <Field label="Fixed amount (KES)" type="number" value={form.fixed_amount} onChange={set("fixed_amount")} error={errors.fixed_amount?.[0]} required />
             )}
             {form.page_type === "flexible" && (
-              <Field
-                label="Minimum amount (KES)"
-                type="number"
-                value={form.minimum_amount}
-                onChange={set("minimum_amount")}
-                error={errors.minimum_amount?.[0]}
-                required
-              />
+              <Field label="Minimum amount (KES)" type="number" value={form.minimum_amount} onChange={set("minimum_amount")} error={errors.minimum_amount?.[0]} required />
             )}
 
             <div className="md:col-span-2">
-              <label className="mb-1.5 block text-xs font-medium text-text-soft">
-                Description
-              </label>
+              <label className="mb-1.5 block text-xs font-medium text-text-soft">Description</label>
               <textarea
                 required
                 value={form.description}
@@ -212,34 +175,19 @@ export default function CheckoutPages() {
                 rows={3}
                 className="w-full rounded-xl border border-ink/12 bg-white px-4 py-3 text-sm outline-none focus:border-jade"
               />
-              {errors.description?.[0] && (
-                <p className="mt-1 text-xs text-coral">
-                  {errors.description[0]}
-                </p>
-              )}
+              {errors.description?.[0] && <p className="mt-1 text-xs text-coral">{errors.description[0]}</p>}
             </div>
           </div>
 
           {(() => {
-            const knownFields = [
-              "profile",
-              "title",
-              "description",
-              "fixed_amount",
-              "minimum_amount",
-            ];
-            const leftover = Object.entries(errors).filter(
-              ([key]) => !knownFields.includes(key),
-            );
+            const knownFields = ["profile", "title", "description", "fixed_amount", "minimum_amount"];
+            const leftover = Object.entries(errors).filter(([key]) => !knownFields.includes(key));
             if (leftover.length === 0) return null;
             return (
               <div className="mt-4 rounded-lg bg-coral/10 px-3 py-2 text-sm text-coral">
                 {leftover.map(([key, messages]) => (
                   <p key={key}>
-                    <span className="font-mono text-xs">{key}</span>:{" "}
-                    {Array.isArray(messages)
-                      ? messages.join(" ")
-                      : String(messages)}
+                    <span className="font-mono text-xs">{key}</span>: {Array.isArray(messages) ? messages.join(" ") : String(messages)}
                   </p>
                 ))}
               </div>
@@ -247,17 +195,8 @@ export default function CheckoutPages() {
           })()}
 
           <div className="mt-6 flex gap-3">
-            <Button type="submit" loading={saving}>
-              Create page
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => {
-                setShowForm(false);
-                setForm(EMPTY);
-              }}
-            >
+            <Button type="submit" loading={saving}>Create page</Button>
+            <Button type="button" variant="ghost" onClick={() => { setShowForm(false); setForm(EMPTY); }}>
               Cancel
             </Button>
           </div>
@@ -286,12 +225,8 @@ export default function CheckoutPages() {
             >
               <div className="flex items-start justify-between">
                 <div className="min-w-0">
-                  <p className="truncate font-semibold text-text">
-                    {page.title}
-                  </p>
-                  <p className="mt-0.5 line-clamp-2 text-xs text-text-soft">
-                    {page.description}
-                  </p>
+                  <p className="truncate font-semibold text-text">{page.title}</p>
+                  <p className="mt-0.5 line-clamp-2 text-xs text-text-soft">{page.description}</p>
                 </div>
                 <span className="ml-3 shrink-0 rounded-full bg-jade/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-jade-deep">
                   {page.page_type}
@@ -300,8 +235,7 @@ export default function CheckoutPages() {
 
               <p className="mt-3 font-mono text-xs text-text-soft">
                 {page.page_type === "fixed" && `KES ${page.fixed_amount}`}
-                {page.page_type === "flexible" &&
-                  `From KES ${page.minimum_amount}`}
+                {page.page_type === "flexible" && `From KES ${page.minimum_amount}`}
                 {page.page_type === "api" && "Amount set by your app"}
               </p>
 
@@ -313,7 +247,7 @@ export default function CheckoutPages() {
                   {copiedId === page.id ? "Copied ✓" : "Copy link"}
                 </button>
                 <a
-                  href={page.payment_url}
+                  href={checkoutLink(page)}
                   target="_blank"
                   rel="noreferrer"
                   className="text-xs font-medium text-jade-deep hover:underline"
@@ -352,9 +286,7 @@ export default function CheckoutPages() {
 function Field({ label, error, ...props }) {
   return (
     <div>
-      <label className="mb-1.5 block text-xs font-medium text-text-soft">
-        {label}
-      </label>
+      <label className="mb-1.5 block text-xs font-medium text-text-soft">{label}</label>
       <input
         {...props}
         className="w-full rounded-xl border border-ink/12 bg-white px-4 py-3 text-sm outline-none transition-colors focus:border-jade"
