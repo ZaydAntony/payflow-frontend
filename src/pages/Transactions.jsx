@@ -113,30 +113,18 @@ export default function Transactions() {
         )}
 
         {filtered?.length > 0 && (
-          <div className="overflow-x-auto">
-          <table className="w-full min-w-[640px] text-left text-sm">
-            <thead>
-              <tr className="border-b border-ink/8 text-xs uppercase tracking-wide text-text-soft">
-                <th className="px-5 py-3 font-medium">Checkout page</th>
-                <th className="px-5 py-3 font-medium">Phone</th>
-                <th className="px-5 py-3 font-medium">Amount</th>
-                <th className="px-5 py-3 font-medium">Status</th>
-                <th className="px-5 py-3 font-medium">Receipt</th>
-                <th className="px-5 py-3 font-medium">Date</th>
-              </tr>
-            </thead>
-            <tbody>
+          <>
+            {/* Mobile: stacked cards, nothing to scroll sideways to see */}
+            <div className="divide-y divide-ink/5 md:hidden">
               {filtered.map((t) => (
-                <tr key={t.id} className="border-b border-ink/5 last:border-0">
-                  <td className="px-5 py-3 font-medium text-text">
-                    {pageTitles[t.checkout_page] ?? `Page #${t.checkout_page}`}
-                  </td>
-                  <td className="px-5 py-3 font-mono text-xs text-text-soft">{t.phone_number}</td>
-                  <td className="px-5 py-3 font-mono text-text">KES {t.amount}</td>
-                  <td className="px-5 py-3">
+                <div key={t.id} className="p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <p className="font-medium text-text">
+                      {pageTitles[t.checkout_page] ?? `Page #${t.checkout_page}`}
+                    </p>
                     <span
                       className={
-                        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize " +
+                        "inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize " +
                         STATUS_STYLES[t.status]
                       }
                     >
@@ -145,18 +133,63 @@ export default function Transactions() {
                       )}
                       {t.status}
                     </span>
-                  </td>
-                  <td className="px-5 py-3 font-mono text-xs text-text-soft">
-                    {t.receipt_number ?? "—"}
-                  </td>
-                  <td className="px-5 py-3 text-xs text-text-soft">
-                    {new Date(t.created_at).toLocaleString()}
-                  </td>
-                </tr>
+                  </div>
+                  <div className="mt-2 flex items-center justify-between font-mono text-xs text-text-soft">
+                    <span>{t.phone_number}</span>
+                    <span className="font-semibold text-text">KES {t.amount}</span>
+                  </div>
+                  <div className="mt-2 flex items-center justify-between text-xs text-text-soft">
+                    <span>{t.receipt_number ?? "No receipt yet"}</span>
+                    <span>{new Date(t.created_at).toLocaleString()}</span>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
-          </div>
+            </div>
+
+            {/* Desktop: full table */}
+            <table className="hidden w-full text-left text-sm md:table">
+              <thead>
+                <tr className="border-b border-ink/8 text-xs uppercase tracking-wide text-text-soft">
+                  <th className="px-5 py-3 font-medium">Checkout page</th>
+                  <th className="px-5 py-3 font-medium">Phone</th>
+                  <th className="px-5 py-3 font-medium">Amount</th>
+                  <th className="px-5 py-3 font-medium">Status</th>
+                  <th className="px-5 py-3 font-medium">Receipt</th>
+                  <th className="px-5 py-3 font-medium">Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((t) => (
+                  <tr key={t.id} className="border-b border-ink/5 last:border-0">
+                    <td className="px-5 py-3 font-medium text-text">
+                      {pageTitles[t.checkout_page] ?? `Page #${t.checkout_page}`}
+                    </td>
+                    <td className="px-5 py-3 font-mono text-xs text-text-soft">{t.phone_number}</td>
+                    <td className="px-5 py-3 font-mono text-text">KES {t.amount}</td>
+                    <td className="px-5 py-3">
+                      <span
+                        className={
+                          "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize " +
+                          STATUS_STYLES[t.status]
+                        }
+                      >
+                        {t.status === "pending" && (
+                          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-current" />
+                        )}
+                        {t.status}
+                      </span>
+                    </td>
+                    <td className="px-5 py-3 font-mono text-xs text-text-soft">
+                      {t.receipt_number ?? "—"}
+                    </td>
+                    <td className="px-5 py-3 text-xs text-text-soft">
+                      {new Date(t.created_at).toLocaleString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
         )}
       </div>
     </div>
