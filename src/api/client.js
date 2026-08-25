@@ -111,3 +111,6 @@ export const submitStkPush = (publicId, payload) => client.post(`/api/v1/pay/${p
 // ---- Transactions (read-only) ----
 export const listTransactions = () => client.get("/api/v1/transactions/");
 export const getTransaction = (id) => client.get(`/api/v1/transactions/${id}/`);
+// ---- Merchant wallet ----
+export const getWallet = (profileId) => client.get(`/api/v1/wallet/${profileId}/`);
+export const withdrawWallet = (profileId) => client.post(`/api/v1/wallet/${profileId}/withdraw/`);

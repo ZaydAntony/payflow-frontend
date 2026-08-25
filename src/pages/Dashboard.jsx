@@ -6,6 +6,7 @@ const NAV = [
   { to: "/dashboard", label: "Payment profiles", end: true },
   { to: "/dashboard/checkout-pages", label: "Checkout pages" },
   { to: "/dashboard/transactions", label: "Transactions" },
+  { to: "/dashboard/wallet", label: "Wallet" },
   { to: "/dashboard/account", label: "Account" },
 ];
 

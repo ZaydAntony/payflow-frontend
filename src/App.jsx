@@ -9,6 +9,9 @@ import Transactions from "./pages/Transactions";
 import Account from "./pages/Account";
 import PublicCheckout from "./pages/PublicCheckout";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Wallet from "./pages/Wallet";
+
+
 
 export default function App() {
   return (
@@ -30,6 +33,7 @@ export default function App() {
         <Route path="checkout-pages" element={<CheckoutPages />} />
         <Route path="transactions" element={<Transactions />} />
         <Route path="account" element={<Account />} />
+        <Route path="wallet" element={<Wallet />} />
       </Route>
 
       <Route path="*" element={<Landing />} />
