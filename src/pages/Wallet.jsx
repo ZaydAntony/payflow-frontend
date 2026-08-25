@@ -1,114 +1,111 @@
 import { useEffect, useState } from "react";
-import { listProfiles, getWallet, withdrawWallet } from "../api/client";
+import { getWalletTable } from "../api/client";
 import { useToast } from "../components/Toast";
-import Button from "../components/Button";
 
 export default function Wallet() {
   const { push } = useToast();
-  const [wallets, setWallets] = useState(null); // [{ profile, balance, entries }]
-  const [withdrawingId, setWithdrawingId] = useState(null);
-
-  const load = async () => {
-    try {
-      const { data: profiles } = await listProfiles();
-      const results = await Promise.all(
-        profiles.map(async (profile) => {
-          try {
-            const { data } = await getWallet(profile.id);
-            return { profile, ...data };
-          } catch {
-            return { profile, balance: "0.00", entries: [] };
-          }
-        })
-      );
-      setWallets(results);
-    } catch {
-      push("Couldn't load your wallet.", "error");
-      setWallets([]);
-    }
-  };
+  const [rows, setRows] = useState(null);
 
   useEffect(() => {
-    load();
+    (async () => {
+      try {
+        const { data } = await getWalletTable();
+        setRows(data);
+      } catch {
+        push("Couldn't load wallet data.", "error");
+        setRows([]);
+      }
+    })();
   }, []);
-
-  const onWithdraw = async (profileId) => {
-    setWithdrawingId(profileId);
-    try {
-      const { data } = await withdrawWallet(profileId);
-      push(`Withdrawal initiated — KES ${data.amount}`, "success");
-      load();
-    } catch (err) {
-      push(err.response?.data?.detail ?? "Withdrawal failed.", "error");
-    } finally {
-      setWithdrawingId(null);
-    }
-  };
 
   return (
     <div>
       <div>
         <h1 className="font-display text-3xl italic text-text">Wallet</h1>
         <p className="mt-1 text-sm text-text-soft">
-          Your share of every split payment, ready to withdraw to M-Pesa.
+          Every split payment across your checkout pages — platform cut vs.
+          organizer share.
         </p>
       </div>
 
-      {wallets === null && (
-        <div className="flex justify-center py-16">
-          <span className="h-6 w-6 animate-spin rounded-full border-2 border-ink/15 border-t-jade" />
-        </div>
-      )}
+      <div className="mt-6 overflow-hidden rounded-2xl border border-ink/10 bg-white/50">
+        {rows === null && (
+          <div className="flex justify-center py-16">
+            <span className="h-6 w-6 animate-spin rounded-full border-2 border-ink/15 border-t-jade" />
+          </div>
+        )}
 
-      {wallets?.length === 0 && (
-        <div className="mt-8 rounded-2xl border border-ink/10 bg-white/50 py-16 text-center">
-          <p className="font-display text-2xl italic text-text">No wallet yet</p>
-          <p className="mx-auto mt-2 max-w-xs text-sm text-text-soft">
-            Connect a payment profile and take a payment to see a balance here.
-          </p>
-        </div>
-      )}
-
-      <div className="mt-8 grid gap-4 md:grid-cols-2">
-        {wallets?.map(({ profile, balance, entries }) => (
-          <div key={profile.id} className="rounded-2xl border border-ink/10 bg-white/50 p-5">
-            <div className="flex items-start justify-between">
-              <p className="font-semibold text-text">{profile.business_name}</p>
-              <span className="rounded-full bg-jade/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-jade-deep">
-                Wallet
-              </span>
-            </div>
-
-            <p className="mt-4 font-display text-3xl italic text-text">
-              KES {balance}
+        {rows?.length === 0 && (
+          <div className="py-16 text-center">
+            <p className="font-display text-2xl italic text-text">
+              No split payments yet
             </p>
-            <p className="mt-1 text-xs text-text-soft">Available to withdraw</p>
+            <p className="mx-auto mt-2 max-w-xs text-sm text-text-soft">
+              Once a checkout page gets paid, the split shows up here.
+            </p>
+          </div>
+        )}
 
-            <Button
-              onClick={() => onWithdraw(profile.id)}
-              loading={withdrawingId === profile.id}
-              disabled={Number(balance) <= 0}
-              className="mt-4 w-full md:w-auto"
-            >
-              Withdraw
-            </Button>
-
-            {entries?.length > 0 && (
-              <div className="mt-5 divide-y divide-ink/5 border-t border-ink/8 pt-3">
-                {entries.slice(0, 5).map((e, i) => (
-                  <div key={i} className="flex items-center justify-between py-2 text-xs">
-                    <span className="text-text-soft">
-                      {new Date(e.created_at).toLocaleDateString()}
-                    </span>
-                    <span className="font-mono text-text">
-                      +{e.merchant_amount} <span className="text-text-soft">of {e.gross_amount}</span>
+        {rows?.length > 0 && (
+          <>
+            <div className="divide-y divide-ink/5 md:hidden">
+              {rows.map((r, i) => (
+                <div key={i} className="p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <p className="font-medium text-text">{r.payment_profile}</p>
+                    <span className="text-xs text-text-soft">
+                      {new Date(r.created_at).toLocaleDateString()}
                     </span>
                   </div>
+                  <p className="mt-1 text-xs text-text-soft">
+                    {r.checkout_page}
+                  </p>
+                  <div className="mt-2 flex items-center justify-between font-mono text-xs">
+                    <span className="text-jade-deep">
+                      Platform: KES {r.platform_cut}
+                    </span>
+                    <span className="font-semibold text-text">
+                      Organizer: KES {r.organizer_share}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <table className="hidden w-full text-left text-sm md:table">
+              <thead>
+                <tr className="border-b border-ink/8 text-xs uppercase tracking-wide text-text-soft">
+                  <th className="px-5 py-3 font-medium">Created</th>
+                  <th className="px-5 py-3 font-medium">Payment profile</th>
+                  <th className="px-5 py-3 font-medium">Checkout page</th>
+                  <th className="px-5 py-3 font-medium">Platform (5%)</th>
+                  <th className="px-5 py-3 font-medium">Organizer share</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((r, i) => (
+                  <tr key={i} className="border-b border-ink/5 last:border-0">
+                    <td className="px-5 py-3 text-xs text-text-soft">
+                      {new Date(r.created_at).toLocaleString()}
+                    </td>
+                    <td className="px-5 py-3 font-medium text-text">
+                      {r.payment_profile}
+                    </td>
+                    <td className="px-5 py-3 text-text-soft">
+                      {r.checkout_page}
+                    </td>
+                    <td className="px-5 py-3 font-mono text-jade-deep">
+                      KES {r.platform_cut}
+                    </td>
+                    <td className="px-5 py-3 font-mono text-text">
+                      KES {r.organizer_share}
+                    </td>
+                  </tr>
                 ))}
-              </div>
-            )}
-          </div>
-        ))}
+              </tbody>
+            </table>
+          </>
+        )}
       </div>
     </div>
   );
